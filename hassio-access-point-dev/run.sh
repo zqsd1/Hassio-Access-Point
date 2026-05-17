@@ -43,7 +43,9 @@ term_handler(){
     killall hostapd 2>/dev/null || true
     killall dnsmasq 2>/dev/null || true
 
-	nmcli connection delete hassio-access-point 2>/dev/null || true
+    my_failure_config_revert
+
+	# nmcli connection delete hassio-access-point 2>/dev/null || true
 
     # nft delete table inet matter 2>/dev/null || true
 
@@ -105,20 +107,7 @@ IP_CIDR="${ADDRESS}/${PREFIX}"
 
 
 config_nm(){
-    # nmcli device set "${INTERFACE}" managed no
-    # ip link set "${INTERFACE}" down
-    # ip addr flush dev "${INTERFACE}"
-    # iw dev "${INTERFACE}" set type managed
-    # ip link set "${INTERFACE}" up
-    # ip addr add "${IP_CIDR}" dev "${INTERFACE}"
-
-    # bashio::log.debug "state before create"
-    # nmcli device status
-    # nmcli device wifi list
-    # nmcli device show "$INTERFACE"
-    # iw dev "$INTERFACE" info
-
-    # bashio::log.info "create nmcli connection"
+    bashio::log.info "create nmcli connection"
     nmcli connection add \
         type wifi \
         ifname "${INTERFACE}" \
@@ -174,6 +163,7 @@ dhcp-option=42,$ADDRESS #ntp server
 EOF
     } > /dnsmasq.conf
 }
+
 config_hostapd(){
         {
 cat <<EOF
@@ -231,6 +221,29 @@ EOF
     }> /nftables.conf
 }
 
+my_failure_config(){
+    # Stop NetworkManager control
+nmcli dev set "$INTERFACE" managed no
+
+# Bring interface down
+ip link set "$INTERFACE" down
+
+# Flush old addresses
+ip addr flush dev "$INTERFACE"
+
+# Assign static address
+ip addr add "$IP_CIDR" dev "$INTERFACE"
+
+# Bring interface up
+ip link set "$INTERFACE" up
+}
+
+my_failure_config_revert(){
+    ip link set "$INTERFACE" down
+    ip addr flush dev "$INTERFACE"
+    nmcli dev set "$INTERFACE" managed yes
+}
+
 echo "Starting Hass.io Access Point Addon"
 # Setup signal handlers
 trap 'term_handler' SIGTERM
@@ -242,7 +255,8 @@ fi
 
 # Setup interface
 bashio::log.info "set nmcli connection interface"
-config_nm
+# config_nm
+my_failure_config
 
 bashio::log.info "config dnsmasq"
 config_dnsmasq
@@ -264,7 +278,7 @@ bashio::log.info "active nft rules"
 # Start dnsmasq if DHCP is enabled in config
 if bashio::config.true "dhcp"; then
     bashio::log.info "## Starting dnsmasq daemon"
-    # dnsmasq -C /dnsmasq.conf
+    dnsmasq -C /dnsmasq.conf
 fi
 
 
@@ -272,11 +286,11 @@ fi
 bashio::log.info "## Starting hostapd daemon"
 # rfkill unblock wifi 2>/dev/null || true
 # If debug level is greater than 1, start hostapd in debug mode
-# if [ "$DEBUG" == "debug" ]; then
-#     hostapd -d /hostapd.conf
-# else
-#     hostapd /hostapd.conf 
-# fi
+if [ "$DEBUG" == "debug" ]; then
+    hostapd -d /hostapd.conf
+else
+    hostapd /hostapd.conf 
+fi
 bashio::log.debug "===== nmcli connection ====="
 ip a show "$INTERFACE"
 nmcli -f ALL device wifi show-password
@@ -285,8 +299,7 @@ nmcli device show "$INTERFACE"
 iw dev "$INTERFACE" info
 iw dev
 ip route
-nmcli -f 802-11-wireless-security connection show hassio-access-point
-# nmcli device monitor "$INTERFACE"
+# nmcli -f 802-11-wireless-security connection show hassio-access-point
 
 bashio::log.info "setup finished, sleep till the end of the world ....."
 sleep infinity &
