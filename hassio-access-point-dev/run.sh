@@ -100,6 +100,7 @@ IP_CIDR="${ADDRESS}/${PREFIX}"
 
 
 config_nm(){
+    bashio::log.info "create nmcli connection"
     nmcli connection add \
         type wifi \
         ifname "${INTERFACE}" \
@@ -107,12 +108,16 @@ config_nm(){
         autoconnect no \
         ssid "${SSID}"
 
+    bashio::log.info "modify nmcli connection"
     nmcli connection modify hassio-access-point \
+        802-11-wireless.mode ap \
+        802-11-wireless.band bg \
         ipv4.method manual \
         ipv4.addresses "${IP_CIDR}" \
         ipv4.never-default yes \
         ipv6.method disabled
 
+    bashio::log.info "up nmcli connection"
     nmcli connection up hassio-access-point
 }
 
