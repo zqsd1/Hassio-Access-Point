@@ -265,7 +265,7 @@ iw dev "$INTERFACE" info
 iw dev
 ip route
 nmcli -f 802-11-wireless-security connection show hassio-access-point
-nmcli device monitor "$INTERFACE"
+# nmcli device monitor "$INTERFACE"
 
 bashio::log.info "setup finished, sleep till the end of the world ....."
 sleep infinity &
