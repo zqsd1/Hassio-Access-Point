@@ -131,7 +131,7 @@ config_nm(){
         ipv4.never-default yes \
         ipv6.method disabled
 
-    nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 2
+    nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 1
 
     bashio::log.info "up nmcli connection"
     nmcli connection up hassio-access-point
