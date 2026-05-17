@@ -100,7 +100,7 @@ IP_CIDR="${ADDRESS}/${PREFIX}"
 
 
 config_nm(){
-    nmcli connection add type ethernet ifname "${INTERFACE}" con-name hassio-access-point
+    nmcli connection add type wifi ifname "${INTERFACE}" con-name hassio-access-point
 
     nmcli connection modify hassio-access-point \
         ipv4.method manual \
