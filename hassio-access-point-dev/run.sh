@@ -43,15 +43,7 @@ term_handler(){
     killall hostapd 2>/dev/null || true
     killall dnsmasq 2>/dev/null || true
 
-	# nmcli connection delete hassio-access-point 2>/dev/null || true
-    ip addr flush dev "${INTERFACE}"
-
-    ip link set "${INTERFACE}" down
-    iw dev "${INTERFACE}" set type managed
-    ip link set "${INTERFACE}" up
-
-    nmcli device set "${INTERFACE}" managed yes
-
+	nmcli connection delete hassio-access-point 2>/dev/null || true
 
     # nft delete table inet matter 2>/dev/null || true
 
@@ -113,52 +105,53 @@ IP_CIDR="${ADDRESS}/${PREFIX}"
 
 
 config_nm(){
-    nmcli device set "${INTERFACE}" managed no
-    ip link set "${INTERFACE}" down
-    ip addr flush dev "${INTERFACE}"
-    iw dev "${INTERFACE}" set type managed
-    ip link set "${INTERFACE}" up
-    ip addr add "${IP_CIDR}" dev "${INTERFACE}"
+    # nmcli device set "${INTERFACE}" managed no
+    # ip link set "${INTERFACE}" down
+    # ip addr flush dev "${INTERFACE}"
+    # iw dev "${INTERFACE}" set type managed
+    # ip link set "${INTERFACE}" up
+    # ip addr add "${IP_CIDR}" dev "${INTERFACE}"
 
-    bashio::log.debug "state before create"
-    nmcli device status
-    nmcli device wifi list
-    nmcli device show "$INTERFACE"
-    iw dev "$INTERFACE" info
+    # bashio::log.debug "state before create"
+    # nmcli device status
+    # nmcli device wifi list
+    # nmcli device show "$INTERFACE"
+    # iw dev "$INTERFACE" info
 
     # bashio::log.info "create nmcli connection"
-    # nmcli connection add \
-    #     type wifi \
-    #     ifname "${INTERFACE}" \
-    #     con-name hassio-access-point \
-    #     autoconnect no \
-    #     ssid "${SSID}"
+    nmcli connection add \
+        type wifi \
+        ifname "${INTERFACE}" \
+        con-name hassio-access-point \
+        autoconnect no \
+        ssid "${SSID}"
 
-    # bashio::log.info "modify nmcli connection"
+    bashio::log.info "modify nmcli connection"
 
-    # bashio::log.info "set access point mode"
-    # nmcli connection modify hassio-access-point \
-    #     802-11-wireless.mode ap \
-    #     802-11-wireless.band bg \
-    #     802-11-wireless.channel "$CHANNEL"
+    bashio::log.info "set access point mode"
+    nmcli connection modify hassio-access-point \
+        802-11-wireless.mode ap \
+        802-11-wireless.band bg \
+        802-11-wireless.channel "$CHANNEL"
 
-    # bashio::log.info "set access point security"
-    # nmcli connection modify hassio-access-point \
-    #     wifi-sec.key-mgmt wpa-psk \
-    #     wifi-sec.psk "$WPA_PASSPHRASE" \
+    bashio::log.info "set access point security"
+    nmcli connection modify hassio-access-point \
+        wifi-sec.key-mgmt wpa-psk \
+        wifi-sec.psk "$WPA_PASSPHRASE" 
 
 
-    # bashio::log.info "set access point network config"
-    # nmcli connection modify hassio-access-point \
-    #     ipv4.method manual \
-    #     ipv4.addresses "${IP_CIDR}" \
-    #     ipv4.never-default yes \
-    #     ipv6.method disabled
+    bashio::log.info "set access point network config"
+    nmcli connection modify hassio-access-point \
+        ipv4.method manual \
+        ipv4.addresses "${IP_CIDR}" \
+        ipv4.never-default yes \
+        ipv6.method disabled
 
-    # # nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 1
+    # nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 1
 
-    # bashio::log.info "up nmcli connection"
-    # nmcli connection up hassio-access-point
+    bashio::log.info "up nmcli connection"
+    nmcli connection down hassio-access-point
+    nmcli connection up hassio-access-point
 }
 
 config_dnsmasq(){
@@ -267,7 +260,7 @@ bashio::log.info "active nft rules"
 # Start dnsmasq if DHCP is enabled in config
 if bashio::config.true "dhcp"; then
     bashio::log.info "## Starting dnsmasq daemon"
-    dnsmasq -C /dnsmasq.conf
+    # dnsmasq -C /dnsmasq.conf
 fi
 
 
@@ -275,11 +268,11 @@ fi
 bashio::log.info "## Starting hostapd daemon"
 # rfkill unblock wifi 2>/dev/null || true
 # If debug level is greater than 1, start hostapd in debug mode
-if [ "$DEBUG" == "debug" ]; then
-    hostapd -d /hostapd.conf
-else
-    hostapd /hostapd.conf 
-fi
+# if [ "$DEBUG" == "debug" ]; then
+#     hostapd -d /hostapd.conf
+# else
+#     hostapd /hostapd.conf 
+# fi
 bashio::log.debug "===== nmcli connection ====="
 ip a show "$INTERFACE"
 nmcli -f ALL device wifi show-password
