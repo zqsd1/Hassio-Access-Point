@@ -122,9 +122,9 @@ config_nm(){
         802-11-wireless.channel "$CHANNEL"
 
     bashio::log.info "set access point security"
-    # nmcli connection modify hassio-access-point \
-    #     wifi-sec.key-mgmt wpa-psk \
-    #     wifi-sec.psk "$WPA_PASSPHRASE" \
+    nmcli connection modify hassio-access-point \
+        wifi-sec.key-mgmt wpa-psk \
+        wifi-sec.psk "$WPA_PASSPHRASE" 
     #     wifi-sec.proto rsn \
     #     wifi-sec.pairwise ccmp \
     #     wifi-sec.group ccmp
@@ -246,7 +246,7 @@ bashio::log.info "active nft rules"
 # Start dnsmasq if DHCP is enabled in config
 if bashio::config.true "dhcp"; then
     bashio::log.info "## Starting dnsmasq daemon"
-    dnsmasq -C /dnsmasq.conf
+    # dnsmasq -C /dnsmasq.conf
 fi
 
 
