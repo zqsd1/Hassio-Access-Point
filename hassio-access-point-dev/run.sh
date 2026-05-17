@@ -100,7 +100,12 @@ IP_CIDR="${ADDRESS}/${PREFIX}"
 
 
 config_nm(){
-    nmcli connection add type wifi ifname "${INTERFACE}" con-name hassio-access-point
+    nmcli connection add \
+        type wifi \
+        ifname "${INTERFACE}" \
+        con-name hassio-access-point \
+        autoconnect no \
+        ssid "${SSID}"
 
     nmcli connection modify hassio-access-point \
         ipv4.method manual \
