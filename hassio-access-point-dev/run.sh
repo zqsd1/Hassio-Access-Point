@@ -132,8 +132,6 @@ config_nm(){
     bashio::log.info "set access point network config"
     nmcli connection modify hassio-access-point \
         ipv4.method shared \
-        # ipv4.addresses "${IP_CIDR}" \
-        # ipv4.never-default yes \
         ipv6.method disabled
 
     # nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 1
