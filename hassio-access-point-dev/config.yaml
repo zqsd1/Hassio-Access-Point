@@ -33,7 +33,6 @@ options:
   client_internet_access: false
   client_dns_override: []
   dnsmasq_config_override: []
-  monitored_interface: null
 schema:
   dry_run: bool
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
@@ -59,4 +58,3 @@ schema:
     - match(^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)
   dnsmasq_config_override:
     - str?
-  monitored_interface: "device(subsystem=net)?"  
