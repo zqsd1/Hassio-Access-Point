@@ -137,8 +137,10 @@ config_nm(){
     bashio::log.info "set access point security"
     nmcli connection modify hassio-access-point \
         wifi-sec.key-mgmt wpa-psk \
-        wifi-sec.psk "$WPA_PASSPHRASE" 
-
+        wifi-sec.psk "$WPA_PASSPHRASE" \
+        wifi-sec.proto rsn \
+        wifi-sec.group ccmp \
+        wifi-sec.pairwise ccmp
 
     bashio::log.info "set access point network config"
     nmcli connection modify hassio-access-point \
@@ -148,8 +150,11 @@ config_nm(){
         ipv6.method disabled
 
     # nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 1
+    nmcli connection modify hassio-access-point \
+        802-11-wireless.powersave 2
 
     bashio::log.info "up nmcli connection"
+    iw reg set FR
     nmcli connection up hassio-access-point
 }
 
