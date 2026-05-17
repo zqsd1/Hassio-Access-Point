@@ -132,10 +132,6 @@ config_nm(){
     nmcli connection modify hassio-access-point \
         wifi-sec.key-mgmt wpa-psk \
         wifi-sec.psk "$WPA_PASSPHRASE" \
-        802-11-wireless-security.pmf 0 \
-        -wifi-sec.proto rsn \
-        -wifi-sec.pairwise ccmp \
-        -wifi-sec.group ccmp
 
 
     bashio::log.info "set access point network config"
