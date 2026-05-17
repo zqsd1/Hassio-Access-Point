@@ -259,8 +259,7 @@ nmcli device show "$INTERFACE"
 iw dev "$INTERFACE" info
 iw dev
 ip route
-bashio::log.debug "journal network mananger"
-journalctl -u NetworkManager -f
+
 
 bashio::log.info "setup finished, sleep till the end of the world ....."
 sleep infinity &
