@@ -122,12 +122,12 @@ config_nm(){
         802-11-wireless.channel "$CHANNEL"
 
     bashio::log.info "set access point security"
-    nmcli connection modify hassio-access-point \
-        wifi-sec.key-mgmt wpa-psk \
-        wifi-sec.psk "$WPA_PASSPHRASE" \
-        wifi-sec.proto rsn \
-        wifi-sec.pairwise ccmp \
-        wifi-sec.group ccmp
+    # nmcli connection modify hassio-access-point \
+    #     wifi-sec.key-mgmt wpa-psk \
+    #     wifi-sec.psk "$WPA_PASSPHRASE" \
+    #     wifi-sec.proto rsn \
+    #     wifi-sec.pairwise ccmp \
+    #     wifi-sec.group ccmp
 
     bashio::log.info "set access point network config"
     nmcli connection modify hassio-access-point \
