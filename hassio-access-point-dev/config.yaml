@@ -10,7 +10,6 @@ boot: auto
 host_network: true
 apparmor: true
 host_dbus: true
-devices: true
 privileged:
   - NET_ADMIN
   - NET_RAW
