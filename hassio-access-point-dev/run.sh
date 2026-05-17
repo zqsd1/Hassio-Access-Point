@@ -20,7 +20,7 @@ debug_file() {
 
     if [ ! -f "$file" ]; then
         bashio::log.error "File not found: $file"
-        return 1
+        return
     fi
 
     bashio::log.debug "===== $file ====="
@@ -219,7 +219,7 @@ debug_file /hostapd.conf
 
 bashio::log.info "config nftables"
 config_nft
-debug_file /nftable.conf
+debug_file /nftables.conf
 
 bashio::log.info "active nft rules"
 nft -f /nftables.conf
