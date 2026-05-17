@@ -150,7 +150,6 @@ config_nm(){
     # nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 1
 
     bashio::log.info "up nmcli connection"
-    nmcli connection down hassio-access-point
     nmcli connection up hassio-access-point
 }
 
