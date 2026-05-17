@@ -1,18 +1,27 @@
 #!/usr/bin/with-contenv bashio
 # shellcheck shell=bash
 
+bashio::log.level "$(bashio::config 'log_level')"
+
 # Enforces required env variables
-required_vars=(ssid wpa_passphrase channel address netmask broadcast)
+required_vars=(ssid wpa_passphrase channel address)
 for required_var in "${required_vars[@]}"; do
     bashio::config.require "$required_var" "An AP cannot be created without this information"
 done
 
-if [ ${#"$(bashio::config 'wpa_passphrase')"} -lt 8 ] ; then
+WPA_PASSPHRASE="$(bashio::config 'wpa_passphrase')"
+
+if (( ${#WPA_PASSPHRASE} < 8 )); then
     bashio::exit.nok "The WPA password must be at least 8 characters long!"
 fi
 
 debug_file() {
     local file="$1"
+
+    if [ ! -f "$file" ]; then
+        bashio::log.error "File not found: $file"
+        return 1
+    fi
 
     bashio::log.debug "===== $file ====="
 
@@ -24,6 +33,7 @@ debug_file() {
 # SIGTERM-handler this funciton will be executed when the container receives the SIGTERM signal (when stopping)
 term_handler(){
 	bashio::log.warning "Stopping Hass.io Access Point"
+    bashio::log.warning "cleanup"
 
     killall hostapd 2>/dev/null || true
     killall dnsmasq 2>/dev/null || true
@@ -44,22 +54,22 @@ dry_run(){
     config_nft
     debug_file /nftables.conf
     exit 0
-    
+
 }
 
-cidr2mask(){
-    local prefix=$1
-    local shift=$(( 32 - prefix ))
-    local bits
-    # start with 32 bits to 1, shift left to match the /24 , trim extra bits with mask so it stay 32bits
-    bits=$(( 0xffffffff << shift & 0xffffffff ))
+# cidr2mask(){
+#     local prefix=$1
+#     local shift=$(( 32 - prefix ))
+#     local bits
+#     # start with 32 bits to 1, shift left to match the /24 , trim extra bits with mask so it stay 32bits
+#     bits=$(( 0xffffffff << shift & 0xffffffff ))
 
-    printf "%d.%d.%d.%d\n" \
-        $(( (bits >> 24) & 0xff )) \
-        $(( (bits >> 16) & 0xff )) \
-        $(( (bits >> 8)  & 0xff )) \
-        $(( bits & 0xff ))
-}
+#     printf "%d.%d.%d.%d\n" \
+#         $(( (bits >> 24) & 0xff )) \
+#         $(( (bits >> 16) & 0xff )) \
+#         $(( (bits >> 8)  & 0xff )) \
+#         $(( bits & 0xff ))
+# }
 
 
 
@@ -86,7 +96,7 @@ DNSMASQ_CONFIG_OVERRIDE=$(bashio::config 'dnsmasq_config_override' )
 # Get the Default Route interface
 DEFAULT_ROUTE_INTERFACE=$(ip route show default | awk '/^default/ { print $5 }')
 IP_CIDR="${ADDRESS}/${PREFIX}"
-NETMASK=cidr2mask "${PREFIX}"
+# NETMASK=cidr2mask "${PREFIX}"
 
 
 config_nm(){
@@ -111,7 +121,7 @@ bogus-priv
 domain-needed
 
 dhcp-range=$DHCP_START_ADDR,$DHCP_END_ADDR,24h
-#dhcp-option=3,$ADDRESS #gateway 
+#dhcp-option=3,$ADDRESS #gateway
 dhcp-option=6,$ADDRESS #dns server
 dhcp-option=42,$ADDRESS #ntp server
 EOF
@@ -125,33 +135,22 @@ ssid=$SSID
 wpa_passphrase=$WPA_PASSPHRASE
 channel=$CHANNEL
 ignore_broadcast_ssid=$HIDE_SSID
-
-# Use the nl80211 driver with the brcmfmac driver
-driver=nl80211
-
-# Use the 2.4GHz band
 hw_mode=g
 
-# Enable 802.11n
+driver=nl80211
+
 ieee80211n=1
-# Enable WMM
 wmm_enabled=1
 
-# Bit field: 1=wpa, 2=wep, 3=both
 auth_algs=1
 
-# Use WPA2
 wpa=2
-# Use a pre-shared key
 wpa_key_mgmt=WPA-PSK
-# Use AES, instead of TKIP
 rsn_pairwise=CCMP
 
-# enable localisation
 ieee80211d=1
 country_code=FR
 
-# hostapd event logger configuration
 logger_stdout=-1
 logger_stdout_level=2
 EOF
@@ -190,24 +189,25 @@ EOF
 echo "Starting Hass.io Access Point Addon"
 # Setup signal handlers
 trap 'term_handler' SIGTERM
+trap 'term_handler' EXIT
 
 if bashio::config.true 'dry_run';then
     dry_run
 fi
 
 # Setup interface
-bashio::log.info "set nmcli connection interface" 
+bashio::log.info "set nmcli connection interface"
 config_nm
 
-bashio::log.info "config dnsmasq" 
+bashio::log.info "config dnsmasq"
 config_dnsmasq
 debug_file /dnsmasq.conf
 
-bashio::log.info "config hostpad" 
+bashio::log.info "config hostpad"
 config_hostapd
 debug_file /hostapd.conf
 
-bashio::log.info "config nftables" 
+bashio::log.info "config nftables"
 config_nft
 debug_file /nftable.conf
 
@@ -216,7 +216,7 @@ nft -f /nftables.conf
 
 # Start dnsmasq if DHCP is enabled in config
 if bashio::config.true "dhcp"; then
-    bashio::log.info "## Starting dnsmasq daemon" 
+    bashio::log.info "## Starting dnsmasq daemon"
     dnsmasq -C /dnsmasq.conf
 fi
 
