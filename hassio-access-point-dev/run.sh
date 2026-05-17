@@ -233,7 +233,7 @@ debug_file /nftables.conf
 bashio::log.info "remove maybe old nftable rule"
 nft delete table inet matter 2>/dev/null || true
 bashio::log.info "active nft rules"
-nft -f /nftables.conf
+# nft -f /nftables.conf
 
 # Start dnsmasq if DHCP is enabled in config
 if bashio::config.true "dhcp"; then
@@ -259,6 +259,8 @@ nmcli device show "$INTERFACE"
 iw dev "$INTERFACE" info
 iw dev
 ip route
+bashio::log.debug "journal network mananger"
+journalctl -u NetworkManager -f
 
 bashio::log.info "setup finished, sleep till the end of the world ....."
 sleep infinity &
