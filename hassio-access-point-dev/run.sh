@@ -128,7 +128,8 @@ config_nm(){
         ipv4.never-default yes \
         ipv6.method disabled
 
-
+    bashio::log.info "up nmcli connection"
+    nmcli connection up hassio-access-point
 }
 
 config_dnsmasq(){
@@ -240,8 +241,7 @@ if bashio::config.true "dhcp"; then
     dnsmasq -C /dnsmasq.conf
 fi
 
-bashio::log.info "up nmcli connection"
-nmcli connection up hassio-access-point
+
 
 bashio::log.info "## Starting hostapd daemon"
 # rfkill unblock wifi 2>/dev/null || true
