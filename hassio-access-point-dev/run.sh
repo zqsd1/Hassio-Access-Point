@@ -224,7 +224,7 @@ EOF
 my_failure_config(){
     # Stop NetworkManager control
 nmcli dev set "$INTERFACE" managed no
-
+pkill wpa_supplicant
 # Bring interface down
 ip link set "$INTERFACE" down
 
@@ -239,9 +239,11 @@ ip link set "$INTERFACE" up
 }
 
 my_failure_config_revert(){
+    pkill wpa_supplicant
     ip link set "$INTERFACE" down
     ip addr flush dev "$INTERFACE"
     nmcli dev set "$INTERFACE" managed yes
+    ip link set "$INTERFACE" up
 }
 
 echo "Starting Hass.io Access Point Addon"
