@@ -13,6 +13,7 @@ host_dbus: true
 devices: true
 privileged:
   - NET_ADMIN
+  - NET_RAW
 init: false
 options:
   dry_run: false
