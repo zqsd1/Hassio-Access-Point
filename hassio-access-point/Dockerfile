@@ -14,11 +14,11 @@ RUN apk update && \
         net-tools \
         sudo \
         dnsmasq \
-        iptables && \
+        nftables && \
     rm -rf /var/cache/apk/*
 
-COPY hostapd.conf /
-COPY dnsmasq.conf /
+# COPY hostapd.conf /
+# COPY dnsmasq.conf /
 
 COPY run.sh /
 RUN chmod a+x /run.sh
