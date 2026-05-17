@@ -107,6 +107,7 @@ IP_CIDR="${ADDRESS}/${PREFIX}"
 config_nm(){
         
     bashio::log.debug "state before create"
+    rfkill list
     nmcli device status
     nmcli device wifi list
     nmcli device show "$INTERFACE"
@@ -138,7 +139,7 @@ config_nm(){
 
     bashio::log.info "set access point network config"
     nmcli connection modify hassio-access-point \
-        ipv4.method shared \
+        ipv4.method manual \
         ipv4.addresses "${IP_CIDR}" \
         ipv4.never-default yes \
         ipv6.method disabled
