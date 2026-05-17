@@ -251,7 +251,15 @@ bashio::log.info "## Starting hostapd daemon"
 # else
 #     hostapd /hostapd.conf & wait ${!}
 # fi
+bashio::log.debug "===== nmcli connection ====="
+ip a show "$INTERFACE"
+nmcli -f ALL device wifi show-password
+nmcli device wifi list
+nmcli device show "$INTERFACE"
+iw dev "$INTERFACE" info
+iw dev
+ip route
 
-
+bashio::log.info "setup finished, sleep till the end of the world ....."
 sleep infinity &
 wait $!
