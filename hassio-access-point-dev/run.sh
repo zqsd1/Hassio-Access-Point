@@ -30,17 +30,22 @@ debug_file() {
     done < "$file"
 }
 
+CLEANED_UP=false
 # SIGTERM-handler this funciton will be executed when the container receives the SIGTERM signal (when stopping)
 term_handler(){
+    if $CLEANED_UP; then
+        return
+    fi
+    CLEANED_UP=true
 	bashio::log.warning "Stopping Hass.io Access Point"
     bashio::log.warning "cleanup"
 
-    killall hostapd 2>/dev/null || true
-    killall dnsmasq 2>/dev/null || true
+    # killall hostapd 2>/dev/null || true
+    # killall dnsmasq 2>/dev/null || true
 
 	nmcli connection delete hassio-access-point 2>/dev/null || true
 
-    nft delete table inet matter 2>/dev/null || true
+    # nft delete table inet matter 2>/dev/null || true
 
 	exit 0
 }
@@ -126,12 +131,12 @@ config_nm(){
 
     bashio::log.info "set access point network config"
     nmcli connection modify hassio-access-point \
-        ipv4.method manual \
-        ipv4.addresses "${IP_CIDR}" \
-        ipv4.never-default yes \
+        ipv4.method shared \
+        # ipv4.addresses "${IP_CIDR}" \
+        # ipv4.never-default yes \
         ipv6.method disabled
 
-    nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 1
+    # nmcli connection modify hassio-access-point 802-11-wireless-security.pmf 1
 
     bashio::log.info "up nmcli connection"
     nmcli connection up hassio-access-point
