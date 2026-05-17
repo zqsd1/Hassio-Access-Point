@@ -107,7 +107,6 @@ IP_CIDR="${ADDRESS}/${PREFIX}"
 config_nm(){
         
     bashio::log.debug "state before create"
-    rfkill list
     nmcli device status
     nmcli device wifi list
     nmcli device show "$INTERFACE"
