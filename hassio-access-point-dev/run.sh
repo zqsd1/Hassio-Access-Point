@@ -253,4 +253,5 @@ bashio::log.info "## Starting hostapd daemon"
 # fi
 
 
-
+sleep infinity &
+wait $!
