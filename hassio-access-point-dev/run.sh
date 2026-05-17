@@ -109,16 +109,26 @@ config_nm(){
         ssid "${SSID}"
 
     bashio::log.info "modify nmcli connection"
+
+    bashio::log.info "set access point mode"
     nmcli connection modify hassio-access-point \
         802-11-wireless.mode ap \
         802-11-wireless.band bg \
+        802-11-wireless.channel "$CHANNEL"
+
+    bashio::log.info "set access point security"
+    nmcli connection modify hassio-access-point \
+        wifi-sec.key-mgmt wpa-psk \
+        wifi-sec.psk "$WPA_PASSPHRASE"
+
+    bashio::log.info "set access point network config"
+    nmcli connection modify hassio-access-point \
         ipv4.method manual \
         ipv4.addresses "${IP_CIDR}" \
         ipv4.never-default yes \
         ipv6.method disabled
 
-    bashio::log.info "up nmcli connection"
-    nmcli connection up hassio-access-point
+
 }
 
 config_dnsmasq(){
@@ -230,14 +240,17 @@ if bashio::config.true "dhcp"; then
     dnsmasq -C /dnsmasq.conf
 fi
 
+bashio::log.info "up nmcli connection"
+nmcli connection up hassio-access-point
+
 bashio::log.info "## Starting hostapd daemon"
 # rfkill unblock wifi 2>/dev/null || true
 # If debug level is greater than 1, start hostapd in debug mode
-if [ "$DEBUG" == "debug" ]; then
-    hostapd -d /hostapd.conf & wait ${!}
-else
-    hostapd /hostapd.conf & wait ${!}
-fi
+# if [ "$DEBUG" == "debug" ]; then
+#     hostapd -d /hostapd.conf & wait ${!}
+# else
+#     hostapd /hostapd.conf & wait ${!}
+# fi
 
 
 
