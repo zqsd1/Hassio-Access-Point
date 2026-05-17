@@ -172,8 +172,6 @@ config_nft(){
         cat <<EOF
 #!/usr/sbin/nft -f
 
-delete table inet matter
-
 table inet matter {
     chain forward {
         type filter hook forward priority 0;
@@ -221,6 +219,8 @@ bashio::log.info "config nftables"
 config_nft
 debug_file /nftables.conf
 
+bashio::log.info "remove maybe old nftable rule"
+nft delete table inet matter 2>/dev/null || true
 bashio::log.info "active nft rules"
 nft -f /nftables.conf
 
