@@ -15,7 +15,6 @@ RUN apk update && \
         sudo \
         dnsmasq \
         nftables && \
-        tcpdump && \
     rm -rf /var/cache/apk/*
 
 # COPY hostapd.conf /
