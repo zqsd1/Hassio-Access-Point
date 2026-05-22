@@ -226,9 +226,9 @@ DNSMASQ_PID=$!
 
 logger "## Starting hostapd" 1
 if [ "$DEBUG" -gt 1 ]; then
-	exec hostapd -d "$RUN_HOSTAPD"
+	exec hostapd -dd "$RUN_HOSTAPD"
 else
 	exec hostapd "$RUN_HOSTAPD" &
 fi
 
-tcpdump -i wlan0
+tcpdump -i "${INTERFACE}"
