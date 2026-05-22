@@ -241,7 +241,7 @@ if [ "$DEBUG" -gt 1 ]; then
 else
 	hostapd "$RUN_HOSTAPD" &
 fi
-cat RUN_DNSMASQ RUN_NFT RUN_NFT
+cat ${RUN_DNSMASQ} ${RUN_NFT} ${RUN_NFT}
 ip a show "${INTERFACE}"
 
 tcpdump -i "${INTERFACE}"
