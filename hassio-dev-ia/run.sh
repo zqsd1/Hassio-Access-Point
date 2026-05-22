@@ -144,7 +144,7 @@ write_dnsmasq_config() {
 		-e "s|^dhcp-option=option:router,.*|dhcp-option=option:router,${ADDRESS}|" \
 		-e "s|^dhcp-option=option:dns-server,.*|dhcp-option=option:dns-server,${ADDRESS}|" \
 		-e "s|^ra-param=.*|ra-param=${INTERFACE},high,0,7200|" \
-		-e "s|^dhcp-range=fd99:99::.*|dhcp-range=::2,::ff,constructor:${INTERFACE},64,12h|" \
+		-e "s|^dhcp-range=fd99:99::.*|dhcp-range=::2,::ff,constructor:${INTERFACE},ra-stateless,slaac,64,12h|" \
 		"$RUN_DNSMASQ"
 
 	if ! bashio::config.true "dhcp"; then
