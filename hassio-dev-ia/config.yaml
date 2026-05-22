@@ -12,6 +12,8 @@ apparmor: true
 host_dbus: true
 privileged:
   - NET_ADMIN
+  - SYS_ADMIN
+  - NET_RAW
 init: false
 options:
   ssid:
