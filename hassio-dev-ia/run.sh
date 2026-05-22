@@ -8,16 +8,26 @@ RUN_HOSTAPD="/run/hostapd.conf"
 RUN_DNSMASQ="/run/dnsmasq.conf"
 RUN_NFT="/run/nftables.conf"
 
+cleanup_wifi(){
+    ip link set "$INTERFACE" down || true
+	ip addr flush dev "$INTERFACE" 2>/dev/null || true
+	ip -6 addr flush dev "$INTERFACE" 2>/dev/null || true
+	nmcli dev set "$INTERFACE" managed yes 2>/dev/null || true
+    # iw dev "$INTERFACE" set type managed || true
+
+	if command -v nmcli >/dev/null 2>&1; then
+		nmcli dev set "$INTERFACE" managed yes 2>/dev/null || true
+	fi
+
+    ip link set "$INTERFACE" up || true
+}
+
 term_handler() {
 	logger "Stopping Hass.io Access Point" 0
 	killall hostapd 2>/dev/null || true
 	killall dnsmasq 2>/dev/null || true
 	nft delete table inet hassio_ap 2>/dev/null || true
-	ip addr flush dev "$INTERFACE" 2>/dev/null || true
-	ip -6 addr flush dev "$INTERFACE" 2>/dev/null || true
-	if command -v nmcli >/dev/null 2>&1; then
-		nmcli dev set "$INTERFACE" managed yes 2>/dev/null || true
-	fi
+	cleanup_wifi
 	exit 0
 }
 
@@ -108,6 +118,7 @@ setup_interface() {
 	ip addr add "${ADDRESS}/${CIDR}" dev "$INTERFACE" broadcast "$BROADCAST"
 	ip -6 addr add "${AP_V6_ADDR}/64" dev "$INTERFACE"
 
+	iw dev "$INTERFACE" set power_save off	
 	apply_sysctl
 }
 
@@ -230,5 +241,7 @@ if [ "$DEBUG" -gt 1 ]; then
 else
 	hostapd "$RUN_HOSTAPD" &
 fi
+cat RUN_DNSMASQ RUN_NFT RUN_NFT
+ip a show "${INTERFACE}"
 
 tcpdump -i "${INTERFACE}"
