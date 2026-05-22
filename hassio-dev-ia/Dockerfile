@@ -14,7 +14,7 @@ RUN apk update && \
         iproute2 \
         procps \
         dnsmasq \
-        nftables && \
+        nftables \
         tcpdump && \
     rm -rf /var/cache/apk/*
 
