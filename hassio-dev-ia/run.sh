@@ -218,7 +218,7 @@ setup_interface
 write_hostapd_config
 write_dnsmasq_config
 write_nftables_config
-load_nftables
+# load_nftables
 
 logger "## Starting dnsmasq (DNS, mDNS-friendly local zones, IPv6 RA)" 1
 dnsmasq -C "$RUN_DNSMASQ" -k &
@@ -230,3 +230,5 @@ if [ "$DEBUG" -gt 1 ]; then
 else
 	exec hostapd "$RUN_HOSTAPD"
 fi
+
+tcpdump -i wlan0
