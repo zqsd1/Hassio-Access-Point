@@ -88,8 +88,8 @@ apply_sysctl() {
 	sysctl_set "net.ipv6.conf.${INTERFACE}.forwarding" 0 || true
 
 	# Matter / IPv6 RA (see matter-server docs)
-	sysctl_set "net.ipv6.conf.${INTERFACE}.accept_ra" 1 || true
-	sysctl_set "net.ipv6.conf.${INTERFACE}.accept_ra_rt_info_max_plen" 64 || true
+	# sysctl_set "net.ipv6.conf.${INTERFACE}.accept_ra" 1 || true
+	# sysctl_set "net.ipv6.conf.${INTERFACE}.accept_ra_rt_info_max_plen" 64 || true
 }
 
 setup_interface() {
