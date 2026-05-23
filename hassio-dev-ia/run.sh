@@ -22,12 +22,24 @@ cleanup_wifi(){
     ip link set "$INTERFACE" up || true
 }
 
+ cleanup_wifi_nonmcli(){
+
+    ip link set "$INTERFACE" down || true
+
+    ip addr flush dev "$INTERFACE" || true
+    ip -6 addr flush dev "$INTERFACE" || true
+
+    iw dev "$INTERFACE" set type managed || true
+
+    ip link set "$INTERFACE" up || true
+ }
+
 term_handler() {
 	logger "Stopping Hass.io Access Point" 0
 	killall hostapd 2>/dev/null || true
 	killall dnsmasq 2>/dev/null || true
 	nft delete table inet hassio_ap 2>/dev/null || true
-	cleanup_wifi
+	# cleanup_wifi_nonmcli
 	exit 0
 }
 
@@ -102,6 +114,23 @@ apply_sysctl() {
 	# sysctl_set "net.ipv6.conf.${INTERFACE}.accept_ra_rt_info_max_plen" 64 || true
 }
 
+
+config_interface() {
+    ip link set "$INTERFACE" down
+
+    ip addr flush dev "$INTERFACE"
+    ip -6 addr flush dev "$INTERFACE"
+
+    iw dev "$INTERFACE" set type managed || true
+
+    ip addr add "$IP_CIDR" dev "$INTERFACE"
+
+    ip -6 addr add "$IPV6_CIDR" dev "$INTERFACE"
+
+    ip link set "$INTERFACE" up
+
+    iw dev "$INTERFACE" set power_save off
+}
 setup_interface() {
 	logger "# Preparing interface $INTERFACE" 1
 
@@ -225,7 +254,8 @@ CIDR=$(netmask_to_cidr "$NETMASK")
 echo "Starting Hass.io Access Point (isolated Matter AP)"
 trap 'term_handler' SIGTERM
 
-setup_interface
+# setup_interface
+# config_interface
 write_hostapd_config
 write_dnsmasq_config
 write_nftables_config
@@ -236,12 +266,12 @@ dnsmasq -C "$RUN_DNSMASQ" -k &
 DNSMASQ_PID=$!
 
 logger "## Starting hostapd" 1
-if [ "$DEBUG" -gt 1 ]; then
-	exec hostapd -dd "$RUN_HOSTAPD"
-else
-	hostapd "$RUN_HOSTAPD" &
-fi
-cat ${RUN_DNSMASQ} ${RUN_NFT} ${RUN_NFT}
+# if [ "$DEBUG" -gt 1 ]; then
+# 	exec hostapd -dd "$RUN_HOSTAPD"
+# else
+# 	hostapd "$RUN_HOSTAPD" &
+# fi
+# cat ${RUN_DNSMASQ} ${RUN_NFT} ${RUN_NFT}
 ip a show "${INTERFACE}"
 
 tcpdump -i "${INTERFACE}"
